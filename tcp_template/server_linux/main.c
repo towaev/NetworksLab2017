@@ -6,7 +6,30 @@
 #include <unistd.h>
 
 #include <string.h>
-
+//readn func
+int readn(int fd, int n){
+	
+	int temp = 0;
+	int counter= 0;
+	char buf[256];
+	bzero(buf, 256);
+	
+	while (counter < n) {
+		temp = read(fd, buf, 255);
+		if (temp < 0) {
+       			 perror("ERROR reading from socket");
+       				return(-1);
+    		}		
+		counter += temp;		
+		if (n < counter){ 
+			for (int i =n;i< counter;i++){
+			buf[i]=' ';}
+			printf("\n %s \n", buf);
+			return 0;
+		}			
+	}	
+	return 0;
+}
 int main(int argc, char *argv[]) {
     int sockfd, newsockfd;
     uint16_t portno;
@@ -14,6 +37,7 @@ int main(int argc, char *argv[]) {
     char buffer[256];
     struct sockaddr_in serv_addr, cli_addr;
     ssize_t n;
+    int err;
 
     /* First call to socket() function */
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -54,14 +78,15 @@ int main(int argc, char *argv[]) {
 
     /* If connection is established then start communicating */
     bzero(buffer, 256);
-    n = read(newsockfd, buffer, 255); // recv on Windows
+    n = 10;
+    err = readn(newsockfd, n); // recv on Windows
 
-    if (n < 0) {
-        perror("ERROR reading from socket");
+    if (err < 0) {
+        //perror("ERROR reading from socket");
         exit(1);
     }
-
-    printf("Here is the message: %s\n", buffer);
+//printf("Here is the message: %s\n", buffer);
+    
 
     /* Write a response to the client */
     n = write(newsockfd, "I got your message", 18); // send on Windows
@@ -70,6 +95,9 @@ int main(int argc, char *argv[]) {
         perror("ERROR writing to socket");
         exit(1);
     }
-
+    shutdown(sockfd,SHUT_RDWR);
+    close(sockfd);
+    shutdown(newsockfd,SHUT_RDWR);
+    close(newsockfd);
     return 0;
 }

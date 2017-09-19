@@ -74,5 +74,9 @@ int main(int argc, char *argv[]) {
     }
 
     printf("%s\n", buffer);
+
+   // printf("%s\n", buffer);
+    shutdown(sockfd,SHUT_RDWR);
+    close(sockfd);
     return 0;
 }
